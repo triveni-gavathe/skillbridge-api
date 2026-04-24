@@ -121,7 +121,7 @@ Assumes Python and pip are already installed.
 
 **1. Clone the repository**
 ```bash
-git clone https://github.com/yourusername/skillbridge.git
+git clone https://github.com/triveni-gavathe/skillbridge-api.git
 cd skillbridge
 ```
 
