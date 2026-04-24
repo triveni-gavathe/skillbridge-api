@@ -1,0 +1,6 @@
+Full Name   : Your Full Name Here
+Email       : your.email@gmail.com
+Phone       : +91 XXXXXXXXXX
+GitHub      : https://github.com/yourusername
+
+Most challenging part: Designing the dual-token system for the monitoring officer role — specifically ensuring the standard JWT was rejected on monitoring endpoints even when the user's role was correct, which required threading a token_type field through the authentication class and into the permission layer.
