@@ -85,33 +85,49 @@ class AttendanceMarkView(APIView):
     permission_classes = [IsStudent]
 
     def post(self, request):
-        serializer = AttendanceSerializer(data=request.data)
-        if not serializer.is_valid():
-            return Response(serializer.errors, status=422)
+        # Accept both 'session_id' and 'session' field names
+        session_id = request.data.get('session_id') or request.data.get('session')
+        status_val = request.data.get('status')
 
-        session = get_object_or_404(Session, pk=serializer.validated_data['session'].id)
+        # Manual validation — return 422 with clear errors
+        errors = {}
+        if not session_id:
+            errors['session_id'] = 'This field is required.'
+        if not status_val:
+            errors['status'] = 'This field is required.'
+        elif status_val not in ['present', 'absent', 'late']:
+            errors['status'] = 'Must be one of: present, absent, late.'
+        if errors:
+            return Response(errors, status=422)
 
-        # student must be enrolled in session's batch
+        session = get_object_or_404(Session, pk=session_id)
+
+        # Student must be enrolled in this session's batch
         enrolled = BatchStudent.objects.filter(
             batch=session.batch, student=request.user
         ).exists()
         if not enrolled:
             return Response(
-                {'error': 'You are not enrolled in this session.'}, status=403
+                {'error': 'You are not enrolled in this session.'},
+                status=403
             )
 
         attendance, created = Attendance.objects.get_or_create(
             session=session,
             student=request.user,
-            defaults={'status': serializer.validated_data['status']},
+            defaults={'status': status_val},
         )
         if not created:
-            attendance.status = serializer.validated_data['status']
+            attendance.status = status_val
             attendance.save()
 
-        return Response(AttendanceSerializer(attendance).data)
-
-
+        return Response({
+            'id': attendance.id,
+            'session': session.id,
+            'student': request.user.id,
+            'status': attendance.status,
+            'marked_at': attendance.marked_at,
+        })
 # GET /sessions/{id}/attendance — Trainer only
 class SessionAttendanceView(ListAPIView):
     serializer_class = AttendanceSerializer

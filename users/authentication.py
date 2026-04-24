@@ -1,5 +1,5 @@
 import jwt
-from datetime import datetime, timedelta
+from datetime import datetime,timezone,timedelta
 from django.conf import settings
 from rest_framework.authentication import BaseAuthentication
 from rest_framework.exceptions import AuthenticationFailed
@@ -13,8 +13,8 @@ def generate_token(user, token_type='standard'):
         'user_id': user.id,
         'role': user.role,
         'token_type': token_type,    # 'standard' or 'monitoring'
-        'iat': datetime.utcnow(),
-        'exp': datetime.utcnow() + timedelta(hours=expiry_hours),
+        'iat': datetime.now(timezone.utc),
+        'exp': datetime.now(timezone.utc) + timedelta(hours=expiry_hours),
     }
     return jwt.encode(payload, settings.JWT_SECRET, algorithm='HS256')
 

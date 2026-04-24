@@ -82,6 +82,7 @@ def test_student_marks_attendance(client, student, batch, session):
     res = client.post('/attendance/mark', {
         'session_id': session.id, 'status': 'present',
     }, format='json')
+    print(res.data)
     assert res.status_code == 200
     assert res.data['status'] == 'present'
 
